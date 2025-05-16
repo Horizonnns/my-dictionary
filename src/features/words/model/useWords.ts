@@ -1,5 +1,10 @@
 import { useState, useEffect } from "react";
 import { getWords, addWord, Word } from "@/shared/wordsApi";
+import {
+  saveOfflineWord,
+  getOfflineWords,
+  clearOfflineWords,
+} from "@/shared/offlineWords";
 
 export function useWords() {
   const [rows, setRows] = useState<Word[]>([]);
@@ -9,19 +14,76 @@ export function useWords() {
   } | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isOnline, setIsOnline] = useState<boolean>(
+    typeof window !== "undefined" ? navigator.onLine : true
+  );
+
+  // Слежение за статусом сети
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
+
+  // Синхронизация офлайн-слов при появлении соединения
+  useEffect(() => {
+    const syncOffline = async () => {
+      if (navigator.onLine) {
+        const offlineWords = await getOfflineWords();
+        if (offlineWords.length > 0) {
+          for (const w of offlineWords) {
+            try {
+              await addWord(w.word, w.translation);
+            } catch {}
+          }
+          await clearOfflineWords();
+          // После синхронизации обновляем список из Supabase
+          getWords().then(setRows);
+        }
+      }
+    };
+    syncOffline();
+    window.addEventListener("online", syncOffline);
+    return () => {
+      window.removeEventListener("online", syncOffline);
+    };
+  }, []);
 
   // Загрузка слов при инициализации
   useEffect(() => {
     setLoading(true);
-    getWords()
-      .then((data) => {
-        setRows(data);
-        setLoading(false);
-      })
-      .catch(() => {
-        setError("Ошибка загрузки слов");
-        setLoading(false);
-      });
+    if (navigator.onLine) {
+      getWords()
+        .then((data) => {
+          setRows(data);
+          setLoading(false);
+        })
+        .catch(() => {
+          setError("Ошибка загрузки слов");
+          setLoading(false);
+        });
+    } else {
+      getOfflineWords()
+        .then((offline) => {
+          setRows(
+            offline.map((w, i) => ({
+              id: `offline-${i}-${Date.now()}`,
+              word: w.word,
+              translation: w.translation,
+            }))
+          );
+          setLoading(false);
+        })
+        .catch(() => {
+          setError("Нет соединения и нет офлайн-слов");
+          setLoading(false);
+        });
+    }
   }, []);
 
   const handleAddRow = async () => {
@@ -40,8 +102,22 @@ export function useWords() {
         setDraftRow(null);
         setLoading(false);
       } catch {
-        setError("Ошибка добавления слова");
+        // Если нет сети — сохраняем офлайн
+        await saveOfflineWord({
+          word: draftRow.word.trim(),
+          translation: draftRow.translation.trim(),
+        });
+        setRows((prev) => [
+          ...prev,
+          {
+            id: `offline-${Date.now()}`,
+            word: draftRow.word.trim(),
+            translation: draftRow.translation.trim(),
+          },
+        ]);
+        setDraftRow(null);
         setLoading(false);
+        setError("Слово сохранено офлайн. Будет добавлено при появлении сети.");
       }
     }
   };
@@ -58,5 +134,6 @@ export function useWords() {
     handleDraftChange,
     loading,
     error,
+    isOnline,
   };
 }
