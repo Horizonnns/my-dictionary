@@ -25,6 +25,7 @@ export default function Home() {
         handleAddRow={words.handleAddRow}
         handleDraftChange={words.handleDraftChange}
         loading={words.loading}
+        error={words.error}
       />
 
       <NotificationBanner isOnline={words.isOnline} error={words.error} />

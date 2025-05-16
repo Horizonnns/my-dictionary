@@ -8,6 +8,7 @@ interface WordTableProps {
   handleAddRow: () => void;
   handleDraftChange: (field: "word" | "translation", value: string) => void;
   loading: boolean;
+  error: string | null;
 }
 
 const WordTable: React.FC<WordTableProps> = ({
@@ -16,6 +17,7 @@ const WordTable: React.FC<WordTableProps> = ({
   handleAddRow,
   handleDraftChange,
   loading,
+  error,
 }) => {
   const columns = [
     {
@@ -112,6 +114,9 @@ const WordTable: React.FC<WordTableProps> = ({
       pagination={false}
       rowKey="id"
       loading={loading}
+      locale={{
+        emptyText: error ? error : "Нет данных",
+      }}
     />
   );
 };
