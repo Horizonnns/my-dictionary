@@ -1,12 +1,20 @@
-import { Table, Input, Button, Tag } from "antd";
-import React from "react";
+import { Table, Input, Button, Tag, Popconfirm } from "antd";
+import React, { useState } from "react";
 import type { Word } from "@/shared/wordsApi";
+import {
+  EditOutlined,
+  DeleteOutlined,
+  CheckOutlined,
+  CloseOutlined,
+} from "@ant-design/icons";
 
 interface WordTableProps {
   rows: Word[];
   draftRow: { word: string; translation: string } | null;
   handleAddRow: () => void;
   handleDraftChange: (field: "word" | "translation", value: string) => void;
+  handleUpdateRow: (id: string, word: string, translation: string) => void;
+  handleDeleteRow: (id: string) => void;
   loading: boolean;
   error: string | null;
 }
@@ -16,9 +24,32 @@ const WordTable: React.FC<WordTableProps> = ({
   draftRow,
   handleAddRow,
   handleDraftChange,
+  handleUpdateRow,
+  handleDeleteRow,
   loading,
   error,
 }) => {
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editWord, setEditWord] = useState("");
+  const [editTranslation, setEditTranslation] = useState("");
+
+  const startEdit = (row: Word) => {
+    setEditId(row.id);
+    setEditWord(row.word);
+    setEditTranslation(row.translation);
+  };
+  const cancelEdit = () => {
+    setEditId(null);
+    setEditWord("");
+    setEditTranslation("");
+  };
+  const saveEdit = () => {
+    if (editId) {
+      handleUpdateRow(editId, editWord, editTranslation);
+      setEditId(null);
+    }
+  };
+
   const columns = [
     {
       title: "№",
@@ -29,15 +60,72 @@ const WordTable: React.FC<WordTableProps> = ({
       title: "Слово",
       dataIndex: "word",
       key: "word",
-      render: (value: React.ReactNode) =>
-        typeof value === "string" ? <Tag color="blue">{value}</Tag> : value,
+      render: (_: any, row: Word) =>
+        editId === row.id ? (
+          <Input
+            value={editWord}
+            onChange={(e) => setEditWord(e.target.value)}
+            size="small"
+            className="!rounded-md !w-28"
+          />
+        ) : (
+          <Tag color="blue">{row.word}</Tag>
+        ),
     },
     {
       title: "Перевод",
       dataIndex: "translation",
       key: "translation",
-      render: (value: React.ReactNode) =>
-        typeof value === "string" ? <Tag color="green">{value}</Tag> : value,
+      render: (_: any, row: Word) =>
+        editId === row.id ? (
+          <Input
+            value={editTranslation}
+            onChange={(e) => setEditTranslation(e.target.value)}
+            size="small"
+            className="!rounded-md !w-28"
+          />
+        ) : (
+          <Tag color="green">{row.translation}</Tag>
+        ),
+    },
+    {
+      title: "",
+      key: "action",
+      render: (_: any, row: Word) =>
+        row.id === "draft" ? null : editId === row.id ? (
+          <>
+            <Button
+              icon={<CheckOutlined />}
+              size="small"
+              type="primary"
+              className="mr-1"
+              onClick={saveEdit}
+              disabled={!editWord || !editTranslation}
+            />
+            <Button
+              icon={<CloseOutlined />}
+              size="small"
+              onClick={cancelEdit}
+            />
+          </>
+        ) : (
+          <>
+            <Button
+              icon={<EditOutlined />}
+              size="small"
+              className="mr-1"
+              onClick={() => startEdit(row)}
+            />
+            <Popconfirm
+              title="Удалить слово?"
+              onConfirm={() => handleDeleteRow(row.id)}
+              okText="Да"
+              cancelText="Нет"
+            >
+              <Button icon={<DeleteOutlined />} size="small" danger />
+            </Popconfirm>
+          </>
+        ),
     },
   ];
 
@@ -97,20 +185,10 @@ const WordTable: React.FC<WordTableProps> = ({
       ]
     : rows;
 
-  const columnsWithAction = [
-    ...columns,
-    {
-      title: "",
-      dataIndex: "action",
-      key: "action",
-      render: (value: React.ReactNode) => value || null,
-    },
-  ];
-
   return (
     <Table
       dataSource={dataSource}
-      columns={columnsWithAction}
+      columns={columns}
       pagination={false}
       rowKey="id"
       loading={loading}

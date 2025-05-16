@@ -24,6 +24,8 @@ export default function Home() {
         draftRow={words.draftRow}
         handleAddRow={words.handleAddRow}
         handleDraftChange={words.handleDraftChange}
+        handleUpdateRow={words.handleUpdateRow}
+        handleDeleteRow={words.handleDeleteRow}
         loading={words.loading}
         error={words.error}
       />

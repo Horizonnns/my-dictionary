@@ -1,5 +1,11 @@
 import { useState, useEffect } from "react";
-import { getWords, addWord, Word } from "@/shared/wordsApi";
+import {
+  getWords,
+  addWord,
+  updateWord,
+  deleteWord,
+  Word,
+} from "@/shared/wordsApi";
 import {
   saveOfflineWord,
   getOfflineWords,
@@ -135,11 +141,41 @@ export function useWords() {
     setDraftRow({ ...draftRow, [field]: value });
   };
 
+  const handleUpdateRow = async (
+    id: string,
+    word: string,
+    translation: string
+  ) => {
+    setLoading(true);
+    try {
+      const updated = await updateWord(id, word, translation);
+      setRows((prev) => prev.map((w) => (w.id === id ? updated : w)));
+      setLoading(false);
+    } catch {
+      setError("Ошибка обновления слова");
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteRow = async (id: string) => {
+    setLoading(true);
+    try {
+      await deleteWord(id);
+      setRows((prev) => prev.filter((w) => w.id !== id));
+      setLoading(false);
+    } catch {
+      setError("Ошибка удаления слова");
+      setLoading(false);
+    }
+  };
+
   return {
     rows,
     draftRow,
     handleAddRow,
     handleDraftChange,
+    handleUpdateRow,
+    handleDeleteRow,
     loading,
     error,
     isOnline,
