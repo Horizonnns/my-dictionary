@@ -50,18 +50,27 @@ const WordTable: React.FC<WordTableProps> = ({
     }
   };
 
+  interface DraftRow {
+    id: "draft";
+    word: React.ReactNode;
+    translation: React.ReactNode;
+    action: React.ReactNode;
+  }
+  type TableRow = Word | DraftRow;
+
   const columns = [
     {
       title: "№",
       key: "index",
-      render: (_: unknown, __: unknown, index: number) => index + 1,
+      render: (_: unknown, __: TableRow, index: number) => index + 1,
     },
     {
       title: "Слово",
       dataIndex: "word",
       key: "word",
-      render: (_: any, row: Word) =>
-        editId === row.id ? (
+      render: (_: string, record: TableRow) => {
+        if (record.id === "draft") return record.word;
+        return editId === record.id ? (
           <Input
             value={editWord}
             onChange={(e) => setEditWord(e.target.value)}
@@ -69,15 +78,17 @@ const WordTable: React.FC<WordTableProps> = ({
             className="!rounded-md !w-28"
           />
         ) : (
-          <Tag color="blue">{row.word}</Tag>
-        ),
+          <Tag color="blue">{record.word}</Tag>
+        );
+      },
     },
     {
       title: "Перевод",
       dataIndex: "translation",
       key: "translation",
-      render: (_: any, row: Word) =>
-        editId === row.id ? (
+      render: (_: string, record: TableRow) => {
+        if (record.id === "draft") return record.translation;
+        return editId === record.id ? (
           <Input
             value={editTranslation}
             onChange={(e) => setEditTranslation(e.target.value)}
@@ -85,20 +96,21 @@ const WordTable: React.FC<WordTableProps> = ({
             className="!rounded-md !w-28"
           />
         ) : (
-          <Tag color="green">{row.translation}</Tag>
-        ),
+          <Tag color="green">{record.translation}</Tag>
+        );
+      },
     },
     {
-      title: "",
+      title: "Действия",
       key: "action",
-      render: (_: any, row: Word) =>
-        row.id === "draft" ? null : editId === row.id ? (
-          <>
+      render: (_: string, record: TableRow) => {
+        if (record.id === "draft" && "action" in record) return record.action;
+        return editId === record.id ? (
+          <span className="flex gap-2">
             <Button
               icon={<CheckOutlined />}
               size="small"
               type="primary"
-              className="mr-1"
               onClick={saveEdit}
               disabled={!editWord || !editTranslation}
             />
@@ -107,29 +119,30 @@ const WordTable: React.FC<WordTableProps> = ({
               size="small"
               onClick={cancelEdit}
             />
-          </>
+          </span>
         ) : (
-          <>
+          <span className="flex gap-2">
             <Button
               icon={<EditOutlined />}
               size="small"
-              className="mr-1"
-              onClick={() => startEdit(row)}
+              onClick={() => startEdit(record as Word)}
             />
             <Popconfirm
               title="Удалить слово?"
-              onConfirm={() => handleDeleteRow(row.id)}
+              onConfirm={() => handleDeleteRow((record as Word).id)}
               okText="Да"
               cancelText="Нет"
             >
               <Button icon={<DeleteOutlined />} size="small" danger />
             </Popconfirm>
-          </>
-        ),
+          </span>
+        );
+      },
     },
   ];
 
-  const dataSource = draftRow
+  // Формируем dataSource: если есть draftRow — добавляем её как последнюю строку
+  const dataSource: TableRow[] = draftRow
     ? [
         ...rows,
         {
