@@ -34,3 +34,18 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## PWA
+
+1. Иконки для PWA разместить в `public/icons/` (icon-192x192.png, icon-512x512.png).
+2. Manifest уже добавлен в `public/manifest.json`.
+3. Service worker настраивается через next-pwa (см. next.config.ts).
+4. Мета-теги и manifest подключены в `src/app/layout.tsx`.
+
+## FSD структура
+
+- `src/shared` — общие утилиты, инфраструктура, стили, pwa (можно создать `shared/pwa` для хуков и вспомогательных функций)
+- `src/entities` — бизнес-сущности
+- `src/features` — фичи
+- `src/widgets` — виджеты
+- `src/app` — layout, роутинг, глобальные провайдеры
