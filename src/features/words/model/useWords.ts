@@ -86,6 +86,14 @@ export function useWords() {
     }
   }, []);
 
+  // Автоматический сброс error через 3 секунды
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => setError(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
   const handleAddRow = async () => {
     if (!draftRow) {
       setDraftRow({ word: "", translation: "" });
