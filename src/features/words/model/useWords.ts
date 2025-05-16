@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   getWords,
   addWord,
@@ -10,6 +10,14 @@ import {
   saveOfflineWord,
   getOfflineWords,
   clearOfflineWords,
+  saveOfflineEditWord,
+  getOfflineEdits,
+  clearOfflineEdits,
+  saveOfflineDeleteWord,
+  getOfflineDeletes,
+  clearOfflineDeletes,
+  saveWordsToIndexedDB,
+  removeOfflineWordById,
 } from "@/shared/offlineWords";
 
 export function useWords() {
@@ -23,6 +31,7 @@ export function useWords() {
   const [isOnline, setIsOnline] = useState<boolean>(
     typeof window !== "undefined" ? navigator.onLine : true
   );
+  const isSyncingRef = useRef(false);
 
   // Слежение за статусом сети
   useEffect(() => {
@@ -36,24 +45,45 @@ export function useWords() {
     };
   }, []);
 
-  // Синхронизация офлайн-слов при появлении соединения
+  // Синхронизация офлайн-операций при появлении соединения
   useEffect(() => {
     const syncOffline = async () => {
+      if (isSyncingRef.current) return;
+      isSyncingRef.current = true;
       if (navigator.onLine) {
+        // 1. Синхронизация добавленных слов
         const offlineWords = await getOfflineWords();
-        if (offlineWords.length > 0) {
-          for (const w of offlineWords) {
+        for (const w of offlineWords) {
+          if (typeof w.id === "string" && w.id.startsWith("offline-")) {
             try {
               await addWord(w.word, w.translation);
+              await removeOfflineWordById(w.id); // удаляем только успешно добавленные
             } catch {}
           }
-          await clearOfflineWords();
-          // После синхронизации обновляем список из Supabase
-          getWords().then(setRows);
         }
+        // 2. Синхронизация редактированных слов
+        const offlineEdits = await getOfflineEdits();
+        for (const e of offlineEdits) {
+          try {
+            await updateWord(e.id, e.word, e.translation);
+          } catch {}
+        }
+        await clearOfflineEdits();
+        // 3. Синхронизация удалённых слов
+        const offlineDeletes = await getOfflineDeletes();
+        for (const d of offlineDeletes) {
+          try {
+            await deleteWord(d.id);
+          } catch {}
+        }
+        await clearOfflineDeletes();
+        // 4. После синхронизации обновляем список из Supabase и IndexedDB
+        const fresh = await getWords();
+        setRows(fresh);
+        await saveWordsToIndexedDB(fresh);
       }
+      isSyncingRef.current = false;
     };
-    syncOffline();
     window.addEventListener("online", syncOffline);
     return () => {
       window.removeEventListener("online", syncOffline);
@@ -65,9 +95,10 @@ export function useWords() {
     setLoading(true);
     if (navigator.onLine) {
       getWords()
-        .then((data) => {
+        .then(async (data) => {
           setRows(data);
           setLoading(false);
+          await saveWordsToIndexedDB(data);
         })
         .catch(() => {
           setError("Ошибка загрузки слов");
@@ -77,8 +108,8 @@ export function useWords() {
       getOfflineWords()
         .then((offline) => {
           setRows(
-            offline.map((w, i) => ({
-              id: `offline-${i}-${Date.now()}`,
+            offline.map((w: any) => ({
+              id: w.id,
               word: w.word,
               translation: w.translation,
             }))
@@ -115,6 +146,7 @@ export function useWords() {
         setRows((prev) => [...prev, newWord]);
         setDraftRow(null);
         setLoading(false);
+        await saveWordsToIndexedDB([...rows, newWord]);
       } catch {
         // Если нет сети — сохраняем офлайн
         await saveOfflineWord({
@@ -147,25 +179,51 @@ export function useWords() {
     translation: string
   ) => {
     setLoading(true);
-    try {
-      const updated = await updateWord(id, word, translation);
-      setRows((prev) => prev.map((w) => (w.id === id ? updated : w)));
+    if (navigator.onLine) {
+      try {
+        const updated = await updateWord(id, word, translation);
+        setRows((prev) => prev.map((w) => (w.id === id ? updated : w)));
+        setLoading(false);
+        await saveWordsToIndexedDB(
+          rows.map((w) => (w.id === id ? { ...w, word, translation } : w))
+        );
+      } catch {
+        setError("Ошибка обновления слова");
+        setLoading(false);
+      }
+    } else {
+      // offline: сохраняем в edits и обновляем локально
+      await saveOfflineEditWord(id, word, translation);
+      setRows((prev) =>
+        prev.map((w) => (w.id === id ? { ...w, word, translation } : w))
+      );
       setLoading(false);
-    } catch {
-      setError("Ошибка обновления слова");
-      setLoading(false);
+      setError(
+        "Изменение сохранено офлайн. Будет применено при появлении сети."
+      );
     }
   };
 
   const handleDeleteRow = async (id: string) => {
     setLoading(true);
-    try {
-      await deleteWord(id);
+    if (navigator.onLine) {
+      try {
+        await deleteWord(id);
+        setRows((prev) => prev.filter((w) => w.id !== id));
+        setLoading(false);
+        await saveWordsToIndexedDB(rows.filter((w) => w.id !== id));
+      } catch {
+        setError("Ошибка удаления слова");
+        setLoading(false);
+      }
+    } else {
+      // offline: сохраняем в deletes и обновляем локально
+      await saveOfflineDeleteWord(id);
       setRows((prev) => prev.filter((w) => w.id !== id));
       setLoading(false);
-    } catch {
-      setError("Ошибка удаления слова");
-      setLoading(false);
+      setError(
+        "Удаление сохранено офлайн. Будет применено при появлении сети."
+      );
     }
   };
 
