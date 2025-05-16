@@ -5,6 +5,12 @@ const STORE_WORDS = "words";
 const STORE_EDITS = "edits";
 const STORE_DELETES = "deletes";
 
+export interface OfflineWord {
+  id: string;
+  word: string;
+  translation: string;
+}
+
 async function getDb() {
   return openDB(DB_NAME, 2, {
     upgrade(db, oldVersion) {
@@ -35,16 +41,9 @@ export async function saveOfflineWord(word: {
   await db.add(STORE_WORDS, { id, ...word });
 }
 
-export async function getOfflineWords(): Promise<
-  { word: string; translation: string }[]
-> {
+export async function getOfflineWords(): Promise<OfflineWord[]> {
   const db = await getDb();
   return db.getAll(STORE_WORDS);
-}
-
-export async function clearOfflineWords() {
-  const db = await getDb();
-  await db.clear(STORE_WORDS);
 }
 
 export async function saveOfflineEditWord(

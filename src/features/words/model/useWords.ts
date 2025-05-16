@@ -9,7 +9,6 @@ import {
 import {
   saveOfflineWord,
   getOfflineWords,
-  clearOfflineWords,
   saveOfflineEditWord,
   getOfflineEdits,
   clearOfflineEdits,
@@ -18,6 +17,7 @@ import {
   clearOfflineDeletes,
   saveWordsToIndexedDB,
   removeOfflineWordById,
+  OfflineWord,
 } from "@/shared/offlineWords";
 
 export function useWords() {
@@ -107,13 +107,12 @@ export function useWords() {
     } else {
       getOfflineWords()
         .then((offline) => {
-          setRows(
-            offline.map((w: any) => ({
-              id: w.id,
-              word: w.word,
-              translation: w.translation,
-            }))
-          );
+          const offlineWords = offline.map((w: OfflineWord) => ({
+            id: w.id,
+            word: w.word,
+            translation: w.translation,
+          }));
+          setRows(offlineWords);
           setLoading(false);
         })
         .catch(() => {
