@@ -8,7 +8,6 @@ interface WordTableProps {
   handleAddRow: () => void;
   handleDraftChange: (field: "word" | "translation", value: string) => void;
   loading: boolean;
-  error: string | null;
 }
 
 const WordTable: React.FC<WordTableProps> = ({
@@ -17,7 +16,6 @@ const WordTable: React.FC<WordTableProps> = ({
   handleAddRow,
   handleDraftChange,
   loading,
-  error,
 }) => {
   const columns = [
     {
@@ -68,6 +66,12 @@ const WordTable: React.FC<WordTableProps> = ({
               size="small"
               onClick={handleAddRow}
               loading={loading}
+              disabled={!draftRow.word || !draftRow.translation}
+              className={
+                !draftRow.word || !draftRow.translation
+                  ? ""
+                  : "!bg-green-500 hover:!bg-green-600 active:!bg-green-700 !text-white"
+              }
             >
               Добавить
             </Button>
@@ -87,16 +91,13 @@ const WordTable: React.FC<WordTableProps> = ({
   ];
 
   return (
-    <>
-      {error && <div className="text-red-500 mb-2">{error}</div>}
-      <Table
-        dataSource={dataSource}
-        columns={columnsWithAction}
-        pagination={false}
-        rowKey="id"
-        loading={loading}
-      />
-    </>
+    <Table
+      dataSource={dataSource}
+      columns={columnsWithAction}
+      pagination={false}
+      rowKey="id"
+      loading={loading}
+    />
   );
 };
 

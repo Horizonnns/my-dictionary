@@ -2,10 +2,12 @@ import React, { useEffect, useRef, useState } from "react";
 
 interface NotificationBannerProps {
   isOnline: boolean;
+  error: string | null;
 }
 
 const NotificationBanner: React.FC<NotificationBannerProps> = ({
   isOnline,
+  error,
 }) => {
   const [visible, setVisible] = useState(!isOnline);
   const lastStatus = useRef(isOnline);
@@ -35,11 +37,12 @@ const NotificationBanner: React.FC<NotificationBannerProps> = ({
           isOnline ? "bg-green-500" : "bg-red-500"
         }
         shadow-lg
-        ${visible ? "translate-y-0" : "-translate-y-full"}
+        ${visible ? "translate-y-0" : "-translate-y-20"}
       `}
       style={{ minWidth: 220 }}
     >
       {isOnline ? "Соединение восстановлено" : "Обрыв соединения..."}
+      {error && <span className="text-xs">{error}</span>}
     </div>
   );
 };
