@@ -1,18 +1,34 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export function useWords() {
-  const [rows, setRows] = useState([
+  const [rows, setRows] = useState<
     {
-      id: 1,
-      word: "Hello",
-      translation: "Привет",
-    },
-  ]);
-
+      id: number;
+      word: string;
+      translation: string;
+    }[]
+  >([]);
   const [draftRow, setDraftRow] = useState<{
     word: string;
     translation: string;
   } | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Загрузка слов при инициализации
+  useEffect(() => {
+    setLoading(true);
+    fetch("http://localhost:3001/words")
+      .then((res) => res.json())
+      .then((data) => {
+        setRows(data);
+        setLoading(false);
+      })
+      .catch(() => {
+        setError("Ошибка загрузки слов");
+        setLoading(false);
+      });
+  }, []);
 
   const handleAddRow = () => {
     if (!draftRow) {
@@ -20,15 +36,25 @@ export function useWords() {
       return;
     }
     if (draftRow.word.trim() && draftRow.translation.trim()) {
-      setRows([
-        ...rows,
-        {
-          id: rows.length + 1,
+      setLoading(true);
+      fetch("http://localhost:3001/words", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
           word: draftRow.word.trim(),
           translation: draftRow.translation.trim(),
-        },
-      ]);
-      setDraftRow(null);
+        }),
+      })
+        .then((res) => res.json())
+        .then((newWord) => {
+          setRows((prev) => [...prev, newWord]);
+          setDraftRow(null);
+          setLoading(false);
+        })
+        .catch(() => {
+          setError("Ошибка добавления слова");
+          setLoading(false);
+        });
     }
   };
 
@@ -42,5 +68,7 @@ export function useWords() {
     draftRow,
     handleAddRow,
     handleDraftChange,
+    loading,
+    error,
   };
 }

@@ -1,15 +1,28 @@
-import { useWords } from "@/features/words/model/useWords";
-
 import { Table, Input, Button, Tag } from "antd";
+import React from "react";
 
-const WordTable = () => {
-  const { rows, draftRow, handleAddRow, handleDraftChange } = useWords();
+interface WordTableProps {
+  rows: { id: number; word: string; translation: string }[];
+  draftRow: { word: string; translation: string } | null;
+  handleAddRow: () => void;
+  handleDraftChange: (field: "word" | "translation", value: string) => void;
+  loading: boolean;
+  error: string | null;
+}
 
+const WordTable: React.FC<WordTableProps> = ({
+  rows,
+  draftRow,
+  handleAddRow,
+  handleDraftChange,
+  loading,
+  error,
+}) => {
   const columns = [
     {
       title: "№",
-      dataIndex: "id",
-      key: "id",
+      key: "index",
+      render: (_: unknown, __: unknown, index: number) => index + 1,
     },
     {
       title: "Слово",
@@ -49,7 +62,12 @@ const WordTable = () => {
             />
           ),
           action: (
-            <Button type="primary" size="small" onClick={handleAddRow}>
+            <Button
+              type="primary"
+              size="small"
+              onClick={handleAddRow}
+              loading={loading}
+            >
               Добавить
             </Button>
           ),
@@ -68,12 +86,16 @@ const WordTable = () => {
   ];
 
   return (
-    <Table
-      dataSource={dataSource}
-      columns={columnsWithAction}
-      pagination={false}
-      rowKey="id"
-    />
+    <>
+      {error && <div className="text-red-500 mb-2">{error}</div>}
+      <Table
+        dataSource={dataSource}
+        columns={columnsWithAction}
+        pagination={false}
+        rowKey="id"
+        loading={loading}
+      />
+    </>
   );
 };
 
