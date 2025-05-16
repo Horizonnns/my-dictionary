@@ -1,8 +1,9 @@
 import { Table, Input, Button, Tag } from "antd";
 import React from "react";
+import type { Word } from "@/shared/wordsApi";
 
 interface WordTableProps {
-  rows: { id: number; word: string; translation: string }[];
+  rows: Word[];
   draftRow: { word: string; translation: string } | null;
   handleAddRow: () => void;
   handleDraftChange: (field: "word" | "translation", value: string) => void;
@@ -44,7 +45,7 @@ const WordTable: React.FC<WordTableProps> = ({
     ? [
         ...rows,
         {
-          id: rows.length + 1,
+          id: "draft",
           word: (
             <Input
               value={draftRow.word}
