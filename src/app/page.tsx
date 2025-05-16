@@ -24,6 +24,7 @@ export default function Home() {
       />
 
       <WordTable
+        cancelAdd={words.handleCancelAdd}
         rows={words.rows}
         draftRow={words.draftRow}
         handleAddRow={words.handleAddRow}

@@ -138,41 +138,12 @@ export function useWords() {
     }
   }, [error]);
 
-  const handleAddRow = async () => {
-    if (!draftRow) {
-      setDraftRow({ word: "", translation: "" });
-      return;
-    }
-    if (draftRow.word.trim() && draftRow.translation.trim()) {
-      setLoading(true);
-      try {
-        const newWord = await addWord(
-          draftRow.word.trim(),
-          draftRow.translation.trim()
-        );
-        setRows((prev) => [...prev, newWord]);
-        setDraftRow(null);
-        setLoading(false);
-        await saveWordsToIndexedDB([...rows, newWord]);
-      } catch {
-        // Если нет сети — сохраняем офлайн
-        await saveOfflineWord({
-          word: draftRow.word.trim(),
-          translation: draftRow.translation.trim(),
-        });
-        setRows((prev) => [
-          ...prev,
-          {
-            id: `offline-${Date.now()}`,
-            word: draftRow.word.trim(),
-            translation: draftRow.translation.trim(),
-          },
-        ]);
-        setDraftRow(null);
-        setLoading(false);
-        setError("Слово сохранено офлайн. Будет добавлено при появлении сети.");
-      }
-    }
+  const handleAddRow = () => {
+    setDraftRow({ word: "", translation: "" });
+  };
+
+  const handleCancelAdd = () => {
+    setDraftRow(null);
   };
 
   const handleDraftChange = (field: "word" | "translation", value: string) => {
@@ -238,6 +209,7 @@ export function useWords() {
     rows: filteredRows,
     draftRow,
     handleAddRow,
+    handleCancelAdd,
     handleDraftChange,
     handleUpdateRow,
     handleDeleteRow,
