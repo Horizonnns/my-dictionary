@@ -1,5 +1,5 @@
 import { Table, Input, Button, Tag, Popconfirm } from "antd";
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import type { Word } from "@/shared/wordsApi";
 import {
   EditOutlined,
@@ -35,6 +35,16 @@ const WordTable: React.FC<WordTableProps> = ({
   const [editId, setEditId] = useState<string | null>(null);
   const [editWord, setEditWord] = useState("");
   const [editTranslation, setEditTranslation] = useState("");
+  const draftRowRef = useRef<HTMLTableRowElement | null>(null);
+
+  useEffect(() => {
+    if (draftRow && draftRowRef.current) {
+      draftRowRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
+  }, [draftRow]);
 
   const startEdit = (row: Word) => {
     setEditId(row.id);
@@ -176,7 +186,6 @@ const WordTable: React.FC<WordTableProps> = ({
                 onClick={cancelAdd}
                 className="!rounded-md"
               />
-
               <Button
                 icon={<PlusOutlined />}
                 type="primary"
@@ -207,6 +216,18 @@ const WordTable: React.FC<WordTableProps> = ({
         emptyText: error ? error : "Нет данных",
       }}
       className="mt-16"
+      rowClassName={(record) => (record.id === "draft" ? "draft-row" : "")}
+      components={{
+        body: {
+          row: (props) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            if ((props as any)["data-row-key"] === "draft") {
+              return <tr ref={draftRowRef} {...props} />;
+            }
+            return <tr {...props} />;
+          },
+        },
+      }}
     />
   );
 };
