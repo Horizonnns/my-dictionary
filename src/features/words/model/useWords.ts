@@ -1,13 +1,8 @@
 import { useState, useEffect } from "react";
+import { getWords, addWord, Word } from "@/shared/wordsApi";
 
 export function useWords() {
-  const [rows, setRows] = useState<
-    {
-      id: number;
-      word: string;
-      translation: string;
-    }[]
-  >([]);
+  const [rows, setRows] = useState<Word[]>([]);
   const [draftRow, setDraftRow] = useState<{
     word: string;
     translation: string;
@@ -18,8 +13,7 @@ export function useWords() {
   // Загрузка слов при инициализации
   useEffect(() => {
     setLoading(true);
-    fetch("http://localhost:3001/words")
-      .then((res) => res.json())
+    getWords()
       .then((data) => {
         setRows(data);
         setLoading(false);
@@ -30,31 +24,25 @@ export function useWords() {
       });
   }, []);
 
-  const handleAddRow = () => {
+  const handleAddRow = async () => {
     if (!draftRow) {
       setDraftRow({ word: "", translation: "" });
       return;
     }
     if (draftRow.word.trim() && draftRow.translation.trim()) {
       setLoading(true);
-      fetch("http://localhost:3001/words", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          word: draftRow.word.trim(),
-          translation: draftRow.translation.trim(),
-        }),
-      })
-        .then((res) => res.json())
-        .then((newWord) => {
-          setRows((prev) => [...prev, newWord]);
-          setDraftRow(null);
-          setLoading(false);
-        })
-        .catch(() => {
-          setError("Ошибка добавления слова");
-          setLoading(false);
-        });
+      try {
+        const newWord = await addWord(
+          draftRow.word.trim(),
+          draftRow.translation.trim()
+        );
+        setRows((prev) => [...prev, newWord]);
+        setDraftRow(null);
+        setLoading(false);
+      } catch {
+        setError("Ошибка добавления слова");
+        setLoading(false);
+      }
     }
   };
 
