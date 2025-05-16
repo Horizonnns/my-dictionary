@@ -24,7 +24,7 @@ const Header = (props: HeaderProps) => {
       </nav>
 
       <button
-        className="bg-blue-500 hover:bg-blue-600 active:bg-blue-700 cursor-pointer transition-colors duration-200 text-white text-[15px] px-2.5 py-1.5 rounded-full"
+        className="bg-blue-500 hover:bg-blue-600 active:bg-blue-700 cursor-pointer transition-colors duration-200 text-white text-[15px] px-2.5 py-1.5 rounded-full !text-white"
         onClick={props.addWord}
       >
         Добавить
