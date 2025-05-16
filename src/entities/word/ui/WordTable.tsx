@@ -202,9 +202,9 @@ const WordTable: React.FC<WordTableProps> = ({
     <Table
       dataSource={dataSource}
       columns={columns}
+      pagination={false}
       rowKey="id"
       loading={loading}
-      pagination={false}
       locale={{
         emptyText: error ? error : "Нет данных",
       }}

@@ -22,6 +22,7 @@ import {
 
 export function useWords() {
   const [rows, setRows] = useState<Word[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [draftRow, setDraftRow] = useState<{
     word: string;
     translation: string;
@@ -32,6 +33,13 @@ export function useWords() {
     typeof window !== "undefined" ? navigator.onLine : true
   );
   const isSyncingRef = useRef(false);
+
+  // Фильтрация слов по поисковому запросу
+  const filteredRows = rows.filter(
+    (row) =>
+      row.word.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      row.translation.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   // Слежение за статусом сети
   useEffect(() => {
@@ -227,7 +235,7 @@ export function useWords() {
   };
 
   return {
-    rows,
+    rows: filteredRows,
     draftRow,
     handleAddRow,
     handleDraftChange,
@@ -236,5 +244,7 @@ export function useWords() {
     loading,
     error,
     isOnline,
+    searchQuery,
+    setSearchQuery,
   };
 }

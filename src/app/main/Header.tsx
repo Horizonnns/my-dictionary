@@ -1,32 +1,31 @@
-import { useState } from "react";
+import { Input } from "antd";
+import { SearchOutlined } from "@ant-design/icons";
 
 interface HeaderProps {
   addWord: () => void;
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
 }
 
-const Header = (props: HeaderProps) => {
-  const [search, setSearch] = useState<string>("");
-
+const Header = ({ addWord, searchQuery, setSearchQuery }: HeaderProps) => {
   return (
-    <header className="flex justify-between items-center space-x-4 bg-gray-100 px-12 py-4 rounded-lg">
+    <header className="flex justify-between items-center space-x-4 bg-gray-100 pl-4 pr-12 py-4 rounded-lg">
       {/* <h1 className="text-2xl font-bold">MyDictionary</h1> */}
 
       <nav className="w-full">
-        <label htmlFor="search">
-          <input
-            type="text"
-            id="search"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full border-2 border-gray-300 rounded-full !text-xs px-2.5 py-1.5"
-            placeholder="Поиск..."
-          />
-        </label>
+        <Input
+          placeholder="Поиск по словам и переводам..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          prefix={<SearchOutlined className="text-gray-400" />}
+          className="!rounded-xl"
+          allowClear
+        />
       </nav>
 
       <button
         className="fixed right-5 z-20 bg-green-500 hover:bg-green-600 active:bg-green-700 cursor-pointer transition-colors duration-200 text-white text-[15px] px-2.5 py-1.5 rounded-full !text-white"
-        onClick={props.addWord}
+        onClick={addWord}
       >
         <svg
           fill="none"

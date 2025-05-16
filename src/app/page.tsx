@@ -17,7 +17,11 @@ export default function Home() {
 
   return (
     <div className="shadow-md rounded-md overflow-hidden">
-      <Header addWord={words.handleAddRow} />
+      <Header
+        addWord={words.handleAddRow}
+        searchQuery={words.searchQuery}
+        setSearchQuery={words.setSearchQuery}
+      />
 
       <WordTable
         rows={words.rows}
