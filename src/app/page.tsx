@@ -2,12 +2,23 @@
 import Header from "@/app/main/Header";
 import WordTable from "../entities/word/ui/WordTable";
 import { useWords } from "@/features/words/model/useWords";
+import { useEffect, useRef } from "react";
+import NotificationBanner from "@/shared/ui/NotificationBanner";
 
 export default function Home() {
   const words = useWords();
+  const prevOnline = useRef(words.isOnline);
+
+  useEffect(() => {
+    if (prevOnline.current !== words.isOnline) {
+      prevOnline.current = words.isOnline;
+    }
+  }, [words.isOnline]);
+
   return (
-    <div className="flex flex-col gap-6">
+    <div>
       <Header addWord={words.handleAddRow} />
+
       <WordTable
         rows={words.rows}
         draftRow={words.draftRow}
@@ -16,6 +27,8 @@ export default function Home() {
         loading={words.loading}
         error={words.error}
       />
+
+      <NotificationBanner isOnline={words.isOnline} />
     </div>
   );
 }
