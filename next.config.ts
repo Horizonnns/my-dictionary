@@ -5,6 +5,9 @@ const withPWA = require("next-pwa")({
   register: true,
   skipWaiting: true,
   disable: !isProd,
+  fallbacks: {
+    document: "/offline.html",
+  },
 });
 
 /** @type {import('next').NextConfig} */
