@@ -208,6 +208,7 @@ const WordTable: React.FC<WordTableProps> = ({
       locale={{
         emptyText: error ? error : "Нет данных",
       }}
+      className="mt-16"
     />
   );
 };
