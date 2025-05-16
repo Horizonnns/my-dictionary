@@ -8,7 +8,7 @@ const Header = (props: HeaderProps) => {
   const [search, setSearch] = useState<string>("");
 
   return (
-    <header className="flex justify-between items-center space-x-4 bg-gray-100 p-4 rounded-lg">
+    <header className="flex justify-between items-center space-x-4 bg-gray-100 px-12 py-4 rounded-lg">
       {/* <h1 className="text-2xl font-bold">MyDictionary</h1> */}
 
       <nav className="w-full">
@@ -25,7 +25,7 @@ const Header = (props: HeaderProps) => {
       </nav>
 
       <button
-        className="bg-green-500 hover:bg-green-600 active:bg-green-700 cursor-pointer transition-colors duration-200 text-white text-[15px] px-2.5 py-1.5 rounded-full !text-white"
+        className="fixed right-5 z-20 bg-green-500 hover:bg-green-600 active:bg-green-700 cursor-pointer transition-colors duration-200 text-white text-[15px] px-2.5 py-1.5 rounded-full !text-white"
         onClick={props.addWord}
       >
         <svg

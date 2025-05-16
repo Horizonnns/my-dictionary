@@ -204,6 +204,7 @@ const WordTable: React.FC<WordTableProps> = ({
       columns={columns}
       rowKey="id"
       loading={loading}
+      pagination={false}
       locale={{
         emptyText: error ? error : "Нет данных",
       }}
