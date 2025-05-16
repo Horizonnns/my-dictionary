@@ -18,8 +18,8 @@ const Header = (props: HeaderProps) => {
             id="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full border-2 border-gray-300 rounded-full px-2.5 py-1"
-            placeholder="поиск..."
+            className="w-full border-2 border-gray-300 rounded-full px-2.5 py-1.5"
+            placeholder="Поиск..."
           />
         </label>
       </nav>

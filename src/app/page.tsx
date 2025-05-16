@@ -16,7 +16,7 @@ export default function Home() {
   }, [words.isOnline]);
 
   return (
-    <div>
+    <div className="shadow-md rounded-md overflow-hidden">
       <Header addWord={words.handleAddRow} />
 
       <WordTable

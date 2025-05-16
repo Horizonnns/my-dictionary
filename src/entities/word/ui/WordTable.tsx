@@ -50,6 +50,7 @@ const WordTable: React.FC<WordTableProps> = ({
               onChange={(e) => handleDraftChange("word", e.target.value)}
               placeholder="Word"
               size="small"
+              className="!rounded-md !w-28"
             />
           ),
           translation: (
@@ -58,6 +59,7 @@ const WordTable: React.FC<WordTableProps> = ({
               onChange={(e) => handleDraftChange("translation", e.target.value)}
               placeholder="Translation"
               size="small"
+              className="!rounded-md !w-28"
             />
           ),
           action: (
@@ -69,11 +71,24 @@ const WordTable: React.FC<WordTableProps> = ({
               disabled={!draftRow.word || !draftRow.translation}
               className={
                 !draftRow.word || !draftRow.translation
-                  ? ""
-                  : "!bg-green-500 hover:!bg-green-600 active:!bg-green-700 !text-white"
+                  ? "!rounded-md"
+                  : "!bg-green-500 hover:!bg-green-600 active:!bg-green-700 !text-white !rounded-md"
               }
             >
-              Добавить
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="size-4"
+              >
+                <path d="M5 12h14" />
+                <path d="M12 5v14" />
+              </svg>
             </Button>
           ),
         },

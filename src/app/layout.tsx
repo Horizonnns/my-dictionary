@@ -34,7 +34,7 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased !bg-slate-50 p-5`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased !bg-slate-50 p-2`}
       >
         {children}
       </body>
