@@ -18,7 +18,7 @@ const Header = (props: HeaderProps) => {
             id="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full border-2 border-gray-300 rounded-full px-2.5 py-1.5"
+            className="w-full border-2 border-gray-300 rounded-full !text-xs px-2.5 py-1.5"
             placeholder="Поиск..."
           />
         </label>

@@ -151,18 +151,18 @@ const WordTable: React.FC<WordTableProps> = ({
             <Input
               value={draftRow.word}
               onChange={(e) => handleDraftChange("word", e.target.value)}
-              placeholder="Word"
+              placeholder="Слово"
               size="small"
-              className="!rounded-md !w-28"
+              className="!text-xs !rounded-md !w-13 !py-1"
             />
           ),
           translation: (
             <Input
               value={draftRow.translation}
               onChange={(e) => handleDraftChange("translation", e.target.value)}
-              placeholder="Translation"
+              placeholder="Перевод"
               size="small"
-              className="!rounded-md !w-28"
+              className="!text-xs !rounded-md !w-13 !py-1"
             />
           ),
           action: (
